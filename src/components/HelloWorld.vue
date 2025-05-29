@@ -3,6 +3,7 @@ import { onMounted, ref } from "vue";
 import $ from "jquery";
 import { useStore } from '@/pinia'
 import { ElMessage } from "element-plus";
+import { get } from '@/alova'
 
 defineProps({
   msg: String,
@@ -14,8 +15,8 @@ const count = ref(0);
 fetch('https://http.dog/101.jpg')
   .then(data => data.blob())
   .then(blob => {
-    console.log('Fetch blob', blob);
-    $('body').append(`<img src="${URL.createObjectURL(blob)}" />`);
+    // console.log('Fetch blob', blob);
+    // $('body').append(`<img src="${URL.createObjectURL(blob)}" />`);
   });
 const store = useStore();
 ElMessage.success(store.toString())
