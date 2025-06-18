@@ -1,41 +1,53 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, reactive, ref, watch } from "vue";
 import $, { fn } from "jquery";
+import { ElMessage } from "element-plus";
 
 
 class Gomoku {
   constructor(size = 25) {
     this._size = size
-    this._board = new Array(size).fill(0).map(() => new Array(size).fill(0))
+    this.init()
+  }
+
+  init() {
+    this._board = new Array(this._size).fill(0).map(() => new Array(this._size).fill(0))
     this._lastX = 0
     this._lastY = 0
+  }
+
+  clear() {
+    this.init()
   }
 
   get lastData() {
     return {
       x: this._lastX,
       y: this._lastY,
-      value: this._board[this._lastX][this._lastY]
+      value: this._board[this._lastY][this._lastX]
     }
   }
 
+  isVoid(x, y) {
+    return this._board[y][x] !== 0
+  }
 
   setPiece(x, y, value, fn = () => { }) {
     if (x < 0 || x >= this._size || y < 0 || y >= this._size) {
       return
     }
-    if (this._board[x][y] === 0) {
-      this._board[x][y] = value
+    if (this._board[y][x] === 0) {
+      this._board[y][x] = value
       this._lastX = x
       this._lastY = y
+      fn()
     }
-    fn()
   }
   createIsVictory(p1M, p2M) {
     const size = this._size
     const board = this._board
     function isValid(x, y, value) {
-      return x >= 0 && x < size && y >= 0 && y < size && value === board[x][y]
+      return x >= 0 && x < size && y >= 0 && y < size && value === board[y][x]
     }
 
     return function (x, y, value) {
@@ -95,15 +107,49 @@ class Gomoku {
 
 const gomoku = new Gomoku()
 const board = ref(gomoku._board)
+const colorG = ['black', 'white']
+
+let id
+const time = ref(0)
 const fall = (...args) => gomoku.setPiece(...args, () => {
-  board.value = gomoku._board
+  if (id) {
+    time.value = 0
+    clearInterval(id)
+  }
+  const end = () => {
+    alert(`恭喜${colorG[n]}胜利`)
+    gomoku.clear()
+    board.value = [...gomoku._board]
+  }
   if (gomoku.isVictory()) {
-    alert('恭喜你，你赢了')
+    end()
+  } else {
+    board.value = [...gomoku._board]
+
+    time.value = 60
+    id = setInterval(() => {
+      time.value--
+      if (!time.value) {
+        end()
+        clearInterval(id)
+      }
+    }, 1000)
   }
 })
 
+
+let n = 0
 function getPos(x, y) {
-  fall(x, y, 1)
+  if (gomoku.isVoid(x, y)) {
+    ElMessage({
+      type: 'error',
+      message: '请勿重复落子',
+      grouping: true
+    })
+    return;
+  }
+  n ^= 1
+  fall(x, y, n + 1)
 }
 
 
@@ -111,32 +157,16 @@ function getPos(x, y) {
 
 
 
-
-
-
-
-
-// onMounted(() => {
-//   fall(1, 1, 1)
-//   fall(1, 2, 1)
-//   fall(1, 3, 1)
-//   fall(1, 4, 1)
-//   fall(1, 5, 2)
-
-//   fall(0, 5, 1)
-//   fall(2, 3, 1)
-//   fall(3, 2, 1)
-//   fall(4, 1, 1)
-//   console.log(...gomoku._board)
-//   console.log('结果', gomoku.isVictory(), gomoku)
-// })
 </script>
 
 <template>
+  请{{ colorG[n ^ 1] }}落子<span v-if="time">，你还有{{ time }}秒</span>
   <div class="board">
     <div class="rows" v-for="(row, r) in board" :key="r">
-      <div class="columns " v-for="(_, c) in row" :key="c" @click="getPos(c, r)">
+      <div class="columns " v-for="(column, c) in row" :key="c" @click="getPos(c, r)">
         <!-- {{ column }} -->
+        <!-- {{ colorG[column - 1] }} -->
+        <div class="chessman" :class="colorG[column - 1]"></div>
       </div>
     </div>
   </div>
@@ -161,12 +191,7 @@ function getPos(x, y) {
       justify-content: center;
       align-items: center;
       position: relative;
-
-      /* &.black { */
-        /* background-color: #000; */
-        border-radius: 50%;
-        /* transform: scale(.5); */
-      /* } */
+      color: #000;
 
       &::before {
         content: '';
@@ -186,6 +211,22 @@ function getPos(x, y) {
 
       &:hover {
         background-color: #cccccc99;
+      }
+
+      .chessman {
+        width: 50%;
+        height: 50%;
+        border-radius: 50%;
+        z-index: 1;
+
+        &.black {
+          background-color: black;
+        }
+
+        &.white {
+          background-color: white;
+          border: 1px solid #ccc;
+        }
       }
     }
   }
