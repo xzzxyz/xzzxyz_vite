@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 
-import HelloWorld from '@/components/HelloWorld.vue'
+import gomoku from '@/components/gomoku.vue'
+import trafficLight from '@/components/trafficLight.vue'
 
 const router = createRouter({
   mode: 'history',
@@ -8,7 +9,8 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      component: HelloWorld,
+      component: gomoku,
+      // component: trafficLight,
     },
     // {
     //   path: '/login',

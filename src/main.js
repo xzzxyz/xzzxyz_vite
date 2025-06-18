@@ -13,5 +13,7 @@ app.use(ePlus)
 import vRouter from '@/router'
 app.use(vRouter)
 
+// import alova from 'alova'
+// app.use(alova)
 
 app.mount('#app')
