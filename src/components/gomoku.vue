@@ -138,7 +138,7 @@ const fall = (...args) => gomoku.setPiece(...args, () => {
 })
 
 
-let n = 0
+let n = 1
 function getPos(x, y) {
   if (gomoku.isVoid(x, y)) {
     ElMessage({

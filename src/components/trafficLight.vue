@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import $ from "jquery";
 import { useStore } from '@/pinia'
 import { ElMessage } from "element-plus";
@@ -60,6 +60,7 @@ const light = new classLight([
 
 
 const time = ref(0)
+let rAFId
 onMounted(() => {
   function render() {
     const { index, color, time: t } = light.getCurData()
@@ -76,11 +77,12 @@ onMounted(() => {
 
 
   function start() {
-    requestAnimationFrame(start)
+    rAFId = requestAnimationFrame(start)
     render()
   }
   start()
 })
+onUnmounted(() => rAFId && cancelAnimationFrame(rAFId))
 </script>
 
 <template>
