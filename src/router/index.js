@@ -1,5 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import { defineAsyncComponent } from 'vue';
+import $ from 'jquery';
 
 
 const routes = [{
@@ -8,8 +9,7 @@ const routes = [{
 }]
 // 自动导入 components 目录下的所有 Vue 文件
 const modules = import.meta.glob('../components/*.vue');
-for (const path in modules) {
-  const page = modules[path];
+$.each(modules, (path, page) => {
   const componentName = path.match(/\.\/components\/(.*)\.vue$/)[1];
   const route = {
     path: `/${componentName.toLowerCase()}`,
@@ -17,7 +17,7 @@ for (const path in modules) {
     component: defineAsyncComponent(page)
   };
   routes.push(route);
-}
+})
 
 
 const router = createRouter({
