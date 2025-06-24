@@ -33,24 +33,10 @@ function updateTimer() {
 function game() {
     console.log('🦴', tetris)
 
-    tetris.createCube()
 
 
     start(() => {
-        const next = tetris.down()
-
-        if (next) {
-            tetris.stack()
-            tetris.createCube()
-        }
-        if (tetris.board.some(row => row === 2 ** tetris.size - 1)) {
-            for (const i in tetris.board) {
-                const e = tetris.board[i]
-                if (e === 2 ** tetris.size - 1) {
-                    tetris.eliminate(i)
-                }
-            }
-        }
+        tetris.down() && tetris.next()
 
         render()
     }, 1000)
