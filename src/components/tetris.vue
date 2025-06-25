@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, onUnmounted, ref } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref } from 'vue'
 import { Tetris } from '../tetris'
 
 
@@ -9,23 +9,30 @@ import { Tetris } from '../tetris'
 
 const colorG = ['#0f0', '#00f', '#ff0', '#f0f', '#0ff']
 const tetris = new Tetris()
-const { start, stop } = updateTimer()
-const board = ref(tetris.t_board)
+const timer = updateTimer()
+const { start, stop } = timer
+const head = ref([])
+const board = ref(tetris.renderBoard.body)
 function render() {
-    board.value = tetris.t_renderBoard
+    head.value = tetris.renderBoard.head
+    board.value = tetris.renderBoard.body
 }
 function updateTimer() {
-    let timer = 0, id
+    let old = 0, frequency = 0, id
     const start = (fn, interval, t = interval) => {
         id = requestAnimationFrame(t => start(fn, interval, t))
-        if (t - timer >= interval) {
-            timer = t
+        if (t - old >= interval) {
             fn()
+            old = t
+            frequency++
         }
     }
     return {
         start,
-        stop: () => cancelAnimationFrame(id)
+        stop: () => cancelAnimationFrame(id),
+        get frequency() {
+            return frequency
+        }
     }
 }
 
@@ -35,12 +42,12 @@ function game() {
 
 
 
-    start(() => {
-        tetris.down() && tetris.next()
+    // start(() => {
+    //     timer.frequency && tetris.down() && tetris.next()
 
-        render()
-    }, 1000)
-    setTimeout(stop, 50000);
+    //     render()
+    // }, 1000)
+    // setTimeout(stop, 50000);
 }
 
 
@@ -79,43 +86,75 @@ onUnmounted(stop)
 </script>
 
 <template>
-    <el-button type="info" @click="start(); startTime = Date.now(); diamondDown()">游戏开始</el-button>
+    <!-- <el-button type="info" @click="start(); startTime = Date.now(); diamondDown()">游戏开始</el-button>
     <el-button type="info" @click="start(); loop()">游戏继续</el-button>
     <el-button type="info" @click="stop()">游戏暂停</el-button>
-    游戏进行了{{ time }}秒
+    游戏进行了{{ time }}秒 -->
 
 
     <div class="box">
-        <div class="row" v-for="(row, r) in board" :key="r">
-            <div class="item" v-for="(item, c) in row" :key="c"
-                :style="{ background: item === 1 ? '#555' : colorG[item - 2] }">
-                {{ item }}
+        <div class="head">
+            <div class="row" v-for="(row, r) in head" :key="r">
+                <div class="item" v-for="(item, c) in row" :key="c"
+                    :style="{ background: item === 1 ? '#555' : colorG[item - 2] }">
+                    <!-- {{ item }} -->
+                </div>
+            </div>
+        </div>
+        <div class="body">
+            <div class="row" v-for="(row, r) in board" :key="r">
+                <div class="item" v-for="(item, c) in row" :key="c"
+                    :style="{ background: item === 1 ? '#555' : colorG[item - 2] }">
+                    <!-- {{ item }} -->
+                </div>
             </div>
         </div>
     </div>
 
 
-    <div class="control">
+    <!-- <div class="control">
         <el-button type="info" @click="control.ArrowLeft()">左</el-button>
         <el-button type="info" @click="control.ArrowUp()">转</el-button>
         <el-button type="info" @click="control.ArrowRight()">右</el-button>
         <el-button type="info" @click="control.Space()">落</el-button>
         <el-button type="info" @click="control.ArrowDown()">下</el-button>
-    </div>
+    </div> -->
 </template>
 
 <style scoped>
 .box {
-    display: flex;
-    flex-direction: column;
-
     .row {
         display: flex;
 
         .item {
             width: 20px;
             height: 20px;
-            border: 1px solid black;
+            border-color: black;
+            border-style: solid;
+            border-width: 0 1px 1px 0;
+
+            &:first-child {
+                border-left-width: 1px;
+            }
+        }
+
+        &:first-child>.item {
+            border-top-width: 1px;
+        }
+    }
+
+    .head {
+        height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: end;
+
+        .item {
+            border-color: #fff;
+        }
+
+        .row:last-child>.item {
+            border-bottom: none;
         }
     }
 }

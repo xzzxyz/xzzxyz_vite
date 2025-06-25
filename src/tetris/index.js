@@ -78,15 +78,17 @@ export class Tetris {
     }
 
     m2a(m) {
+        // 矩阵转一维数组
         return m.map(r => +`0b${r.map(i => i ? 1 : 0).join('')}`)
     }
 
     a2m(a, v = 1) {
+        // 一维数组转矩阵
         const t = r => r.toString(2).padStart(10, 0).split('').map(i => +i ? v : 0)
         return a.map(r => Array.isArray(r) ? t(r.join('')) : t(r))
     }
 
-    getRow(target = []) {
+    getRow(target = [], returnNumber = false) {
         const row = Array(this.size.width).fill(0)
         for (const i in row) {
             for (const j of target) {
@@ -94,6 +96,9 @@ export class Tetris {
                     row[i] = 1
                 }
             }
+        }
+        if (returnNumber) {
+            return +`0b${row.join('')}`
         }
         return row
     }
@@ -103,20 +108,30 @@ export class Tetris {
     }
 
     left() {
-        const b = this.cube
-        if (this.isVoid(Math.max(...b), 2 ** (this.size.width - 1))) {
+        const c = this.cube
+        const b = this.board
+        const _isVoid = c.some((r, i) =>
+            r &&
+            (this.isVoid(r, 2 ** (this.size.width - 1)) || this.isVoid(r, b[i]))
+        )
+        if (_isVoid) {
             return;
         }
         this.cubei.position0[0]--
-        this.cube = b.map(v => v << 1)
+        this.cube = c.map(v => v << 1)
     }
     right() {
-        const b = this.cube
-        if (this.isVoid(Math.max(...b), 1)) {
+        const c = this.cube
+        const b = this.board
+        const _isVoid = c.some((r, i) =>
+            r &&
+            (this.isVoid(r, 1) || this.isVoid(r, b[i]))
+        )
+        if (_isVoid) {
             return;
         }
         this.cubei.position0[0]++
-        this.cube = b.map(v => v >> 1)
+        this.cube = c.map(v => v >> 1)
     }
     spin() {
         let { position0: [x0, y0] } = this.cubei
@@ -124,16 +139,13 @@ export class Tetris {
         const { width, height } = this.size
         const xIsVoid = x0 < 0 || x0 > width - len
         const yIsVoid = y0 < 0 || y0 > height
+        console.log('🙂', xIsVoid, yIsVoid, x0, y0)
         if (xIsVoid) {
             while (1) {
                 x0 = this.cubei.position0[0]     // 重新获取 x0
-                if (x0 < 0) {
-                    this.right()
-                } else if (x0 > width - len) {
-                    this.left()
-                } else {
-                    break;
-                }
+                if (x0 > width - len) this.left()
+                else if (x0 < 0) this.right()
+                else break;
             }
         }
         if (yIsVoid) {
@@ -163,6 +175,7 @@ export class Tetris {
             return;
         }
         if (i === b.length - 1 || this.isVoid(b[i], this.board[i + 1])) {
+            console.log('😇', i)
             return true;
         }
         this.cubei.position0[1]++
@@ -233,9 +246,12 @@ export class Tetris {
     get t_cube() {
         return this.a2m(this.cube, this.cubei.color)
     }
-    get t_renderBoard() {
-        const c = this.t_cube.slice(-this.size.height)
-        const b = this.t_board.slice(-this.size.height)
-        return b.map((row, i) => row.map((col, j) => c[i][j] + col))
+    get renderBoard() {
+        const all = this.t_board.map((r, i) => r.map((c, j) => this.t_cube[i][j] + c))
+        return {
+            all,
+            head: all.slice(0, this.cubei.length),
+            body: all.slice(-this.size.height)
+        }
     }
 }
