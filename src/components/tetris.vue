@@ -1,22 +1,9 @@
 <script setup>
-import { nextTick, onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { Tetris } from '../tetris'
 
 
-
-
-
-
 const colorG = ['#0f0', '#00f', '#ff0', '#f0f', '#0ff']
-const tetris = new Tetris()
-const timer = updateTimer()
-const { start, stop } = timer
-const head = ref([])
-const board = ref(tetris.renderBoard.body)
-function render() {
-    head.value = tetris.renderBoard.head
-    board.value = tetris.renderBoard.body
-}
 function updateTimer() {
     let old = 0, frequency = 0, id
     const start = (fn, interval, t = interval) => {
@@ -29,7 +16,7 @@ function updateTimer() {
     }
     return {
         start,
-        stop: () => cancelAnimationFrame(id),
+        stop: () => id && cancelAnimationFrame(id),
         get frequency() {
             return frequency
         }
@@ -37,21 +24,15 @@ function updateTimer() {
 }
 
 
-function game() {
-    console.log('🦴', tetris)
-
-
-
-    // start(() => {
-    //     timer.frequency && tetris.down() && tetris.next()
-
-    //     render()
-    // }, 1000)
-    // setTimeout(stop, 50000);
+const tetris = new Tetris()
+const timer = updateTimer()
+const { start, stop } = timer
+const head = ref([])
+const board = ref(tetris.renderBoard.body)
+function render() {
+    head.value = tetris.renderBoard.head
+    board.value = tetris.renderBoard.body
 }
-
-
-
 
 
 const control = {
@@ -81,15 +62,34 @@ window.addEventListener('keydown', e => {
 })
 
 
-onMounted(game)
+const time = ref(0)
+const game = () => {
+    timer.frequency && tetris.down() && tetris.next()
+    render()
+    time.value++
+}
+const isStop = ref()
+const gameStart = () => {
+    isStop.value = false
+    start(game, 1000)
+}
+const pause = () => {
+    isStop.value = true
+    stop()
+}
+onMounted(() => {
+    console.log('🦴', tetris)
+})
 onUnmounted(stop)
 </script>
 
 <template>
-    <!-- <el-button type="info" @click="start(); startTime = Date.now(); diamondDown()">游戏开始</el-button>
-    <el-button type="info" @click="start(); loop()">游戏继续</el-button>
-    <el-button type="info" @click="stop()">游戏暂停</el-button>
-    游戏进行了{{ time }}秒 -->
+    <el-button v-if="!timer.frequency" type="info" @click="gameStart">游戏开始</el-button>
+    <el-button v-else-if="isStop" type="info" @click="gameStart">游戏继续</el-button>
+    <template v-else>
+        <el-button type="info" @click="pause">游戏暂停</el-button>
+        <span>游戏进行了{{ time }}秒</span>
+    </template>
 
 
     <div class="box">

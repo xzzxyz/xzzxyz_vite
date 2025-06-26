@@ -2,76 +2,8 @@ export class Tetris {
     constructor(options = {}) {
         const { width = 10, height = 20 } = options
         this.size = { width, height }
-        this.cubes = [
-            {
-                matrix: [
-                    [0, 1, 0, 0],
-                    [0, 1, 0, 0],
-                    [0, 1, 0, 0],
-                    [0, 1, 0, 0]
-                ]
-            },
-            {
-                matrix: [
-                    [1, 1],
-                    [1, 1]
-                ]
-            },
-            {
-                matrix: [
-                    [0, 1, 0],
-                    [1, 1, 1],
-                    [0, 0, 0]
-                ]
-            },
-            {
-                matrix: [
-                    [0, 1, 1],
-                    [1, 1, 0],
-                    [0, 0, 0]
-                ]
-            },
-            {
-                matrix: [
-                    [1, 1, 0],
-                    [0, 1, 1],
-                    [0, 0, 0]
-                ]
-            },
-            {
-                matrix: [
-                    [1, 0, 0],
-                    [1, 1, 1],
-                    [0, 0, 0]
-                ]
-            },
-            {
-                matrix: [
-                    [0, 0, 1],
-                    [1, 1, 1],
-                    [0, 0, 0]
-                ]
-            },
-        ]
 
-
-        this.cubes.forEach((cube, index) => {
-            const length = cube.matrix.length
-            const left = Math.floor((width - length) / 2)
-            const moveBoard = Array(height + length).fill(Array(width).fill(0))
-            cube.matrix.forEach((row, i) => moveBoard[i] =
-                this.getRow(
-                    row.map((m, n) => m * (n + left)).filter(Boolean)
-                )
-            )
-            cube.index = index
-            cube.length = length
-            cube.position0 = [left, 0]
-            cube.t_board = moveBoard
-            cube.board = this.m2a(moveBoard)
-        })
-
-
+        this.cubeInit()
         this.createCube()
         const board = Array(this.cube.length).fill(Array(width).fill(0))
         this.board = this.m2a(board)
@@ -198,6 +130,78 @@ export class Tetris {
         for (let i = 0; i < times; i++) {
             this.down()
         }
+    }
+
+    cubeInit() {
+        const { width, height } = this.size
+        this.cubes = [
+            {
+                matrix: [
+                    [0, 1, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 1, 0, 0],
+                    [0, 1, 0, 0]
+                ]
+            },
+            {
+                matrix: [
+                    [1, 1],
+                    [1, 1]
+                ]
+            },
+            {
+                matrix: [
+                    [0, 1, 0],
+                    [1, 1, 1],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                matrix: [
+                    [0, 1, 1],
+                    [1, 1, 0],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                matrix: [
+                    [1, 1, 0],
+                    [0, 1, 1],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                matrix: [
+                    [1, 0, 0],
+                    [1, 1, 1],
+                    [0, 0, 0]
+                ]
+            },
+            {
+                matrix: [
+                    [0, 0, 1],
+                    [1, 1, 1],
+                    [0, 0, 0]
+                ]
+            },
+        ]
+
+
+        this.cubes.forEach((cube, index) => {
+            const length = cube.matrix.length
+            const left = Math.floor((width - length) / 2)
+            const moveBoard = Array(height + length).fill()
+            moveBoard.forEach((_, i) => moveBoard[i] =
+                this.getRow(
+                    cube.matrix[i]?.map((m, n) => m * (n + left)).filter(Boolean)
+                )
+            )
+            cube.index = index
+            cube.length = length
+            cube.position0 = [left, 0]
+            cube.t_board = moveBoard
+            cube.board = this.m2a(moveBoard)
+        })
     }
 
     createCube() {
