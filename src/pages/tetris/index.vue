@@ -64,9 +64,8 @@ function render() {
 const gameStart = () => {
     isStop.value = false
     const game = () => {
-        time.value && tetris.down() && tetris.next()
+        time.value++ && tetris.down() && tetris.next()
         render()
-        time.value++
     }
     start(game, 1000)
 }
@@ -77,6 +76,7 @@ const pause = () => {
 const reset = () => {
     stop()
     tetris.reset()
+    time.value = 0
     head.value = []
     board.value = tetris.renderBoard.body
     console.log('👓', head, board)
