@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { Tetris } from '../tetris'
+import { Tetris } from '../pages/tetris'
 
 
 const colorG = ['#0f0', '#00f', '#ff0', '#f0f', '#0ff']
@@ -85,11 +85,10 @@ onUnmounted(stop)
 
 <template>
     <el-button v-if="!timer.frequency" type="info" @click="gameStart">游戏开始</el-button>
+    <el-button v-else-if="isStop" type="info" @click="gameStart">游戏继续</el-button>
     <template v-else>
-        <el-button v-if="isStop" type="info" @click="gameStart">游戏继续</el-button>
-        <el-button v-if="!isStop" type="info" @click="pause">游戏暂停</el-button>
-        <el-button type="info" @click="gameStart">重来</el-button>
-        <span v-if="!isStop">游戏进行了{{ time }}秒</span>
+        <el-button type="info" @click="pause">游戏暂停</el-button>
+        <span>游戏进行了{{ time }}秒</span>
     </template>
 
 
