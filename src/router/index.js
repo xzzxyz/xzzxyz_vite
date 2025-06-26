@@ -8,12 +8,12 @@ const routes = [{
   redirect: '/tetris'
 }]
 // 自动导入 components 目录下的所有 Vue 文件
-const modules = import.meta.glob('../components/*.vue');
+const modules = import.meta.glob('../pages/*/index.vue');
 $.each(modules, (path, page) => {
-  const componentName = path.match(/\.\/components\/(.*)\.vue$/)[1];
+  const pageName = path.match(/\.\/pages\/(.*)\/index\.vue$/)[1];
   const route = {
-    path: `/${componentName.toLowerCase()}`,
-    name: componentName,
+    path: `/${pageName.toLowerCase()}`,
+    name: pageName,
     component: defineAsyncComponent(page)
   };
   routes.push(route);

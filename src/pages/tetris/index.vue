@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue'
-import { Tetris } from '../tetris'
+import { Tetris } from '../../tetris'
 
 
 const colorG = ['#0f0', '#00f', '#ff0', '#f0f', '#0ff']
