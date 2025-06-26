@@ -4,9 +4,7 @@ export class Tetris {
         this.size = { width, height }
 
         this.cubeInit()
-        this.createCube()
-        const board = Array(this.cube.length).fill(Array(width).fill(0))
-        this.board = this.m2a(board)
+        this.init()
     }
 
     m2a(m) {
@@ -114,21 +112,10 @@ export class Tetris {
         this.cube = [0, ...b.slice(0, -1)]
     }
     straightDown() {
-        const b = this.cube
-        const d = this.board
-        const i = b.findLastIndex(Boolean)
-        const j = d.find(Boolean) ? d.findIndex(Boolean) : d.length - 1
-        if (i === -1) {
-            return;
-        }
-        let times
-        if (this.isVoid(b[i], d[j])) {
-            times = j - i - 1
-        } else {
-            times = j - i
-        }
-        for (let i = 0; i < times; i++) {
-            this.down()
+        while (1) {
+            if (this.down()) {
+                break;
+            }
         }
     }
 
@@ -209,6 +196,16 @@ export class Tetris {
         const color = Math.floor(Math.random() * 5) + 2
         this.cubei = { color, ...this.cubes[index] }
         this.cube = structuredClone(this.cubei.board)
+    }
+
+    init() {
+        this.createCube()
+        const board = Array(this.cube.length).fill(Array(this.size.width).fill(0))
+        this.board = this.m2a(board)
+    }
+
+    reset() {
+        this.init()
     }
 
     next() {

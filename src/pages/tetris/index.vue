@@ -3,23 +3,19 @@ import { onMounted, onUnmounted, ref } from 'vue'
 import { Tetris } from '../tetris'
 
 
-const colorG = ['#0f0', '#00f', '#ff0', '#f0f', '#0ff']
+const colorG = ['#0f07', '#00f7', '#ff07', '#f0f7', '#0ff7']
 function updateTimer() {
-    let old = 0, frequency = 0, id
+    let old = 0, id
     const start = (fn, interval, t = interval) => {
         id = requestAnimationFrame(t => start(fn, interval, t))
         if (t - old >= interval) {
             fn()
             old = t
-            frequency++
         }
     }
     return {
         start,
-        stop: () => id && cancelAnimationFrame(id),
-        get frequency() {
-            return frequency
-        }
+        stop: () => id && cancelAnimationFrame(id)
     }
 }
 
@@ -29,11 +25,6 @@ const timer = updateTimer()
 const { start, stop } = timer
 const head = ref([])
 const board = ref(tetris.renderBoard.body)
-function render() {
-    head.value = tetris.renderBoard.head
-    board.value = tetris.renderBoard.body
-}
-
 
 const control = {
     ArrowLeft() {
@@ -63,19 +54,32 @@ window.addEventListener('keydown', e => {
 
 
 const time = ref(0)
-const game = () => {
-    timer.frequency && tetris.down() && tetris.next()
-    render()
-    time.value++
-}
 const isStop = ref()
+function render() {
+    head.value = tetris.renderBoard.head
+    board.value = tetris.renderBoard.body
+    console.log('👋', ...tetris.renderBoard.head, ...tetris.renderBoard.body)
+}
+
 const gameStart = () => {
     isStop.value = false
+    const game = () => {
+        time.value && tetris.down() && tetris.next()
+        render()
+        time.value++
+    }
     start(game, 1000)
 }
 const pause = () => {
     isStop.value = true
     stop()
+}
+const reset = () => {
+    stop()
+    tetris.reset()
+    head.value = []
+    board.value = tetris.renderBoard.body
+    console.log('👓', head, board)
 }
 onMounted(() => {
     console.log('🦴', tetris)
@@ -84,11 +88,11 @@ onUnmounted(stop)
 </script>
 
 <template>
-    <el-button v-if="!timer.frequency" type="info" @click="gameStart">游戏开始</el-button>
+    <el-button v-if="!time" type="info" @click="gameStart">游戏开始</el-button>
     <template v-else>
         <el-button v-if="isStop" type="info" @click="gameStart">游戏继续</el-button>
         <el-button v-if="!isStop" type="info" @click="pause">游戏暂停</el-button>
-        <el-button type="info" @click="gameStart">重来</el-button>
+        <el-button type="info" @click="reset">重置</el-button>
         <span v-if="!isStop">游戏进行了{{ time }}秒</span>
     </template>
 
